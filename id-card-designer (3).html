@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ID Card Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: "NikoshCard"; src: url("fonts/NikoshBAN.ttf") format("truetype"); font-display: swap; }
+  @font-face { font-family: "BanglaCard"; src: url("fonts/bangla.ttf") format("truetype"); font-display: swap; }
+  :root {
+    --navy: #17306b; --band: #1f4aa8; --ink: #1c2340; --muted: #5a6180;
+    --paper: #ffffff; --bg: #eef1f7; --line: #d4d9e6; --red: #8a1c2b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #161a28; --ink: #e8ebf5; --muted: #9aa2bf; --line: #2c3350; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .9rem; }
+  .panel { background: color-mix(in srgb, var(--bg) 70%, #fff 30%); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: 3px; }
+  input, select { width: 100%; padding: 8px 9px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--paper); color: #1c2340; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  button { padding: 9px 16px; border: 0; border-radius: 6px; background: var(--navy); color: #fff; font: inherit; cursor: pointer; }
+  button.alt { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--band); outline-offset: 2px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; }
+  .cap { text-align: center; font-size: .8rem; color: var(--muted); margin-bottom: 6px; }
+
+  /* ===== CARD: 85.6 x 54 mm, drawn at 4x for screen ===== */
+  .card {
+    width: 85.6mm; height: 54mm; background: var(--paper); color: #1c2340;
+    border-radius: 3mm; border: .25mm solid #b9c0d4; overflow: hidden; position: relative;
+    box-shadow: 0 2px 10px rgba(20,30,70,.15);
+    font-family: "Times New Roman", Georgia, serif;
+  }
+  /* front */
+  .f-head { display: flex; align-items: center; gap: 2mm; padding: 2.4mm 3.5mm 0; }
+  .logo { width: 10mm; height: 10mm; flex: none; }
+  .logo img, .logo svg { width: 100%; height: 100%; object-fit: contain; }
+  .f-title { line-height: 1.1; }
+  .f-title .bn { font-family: "NikoshCard", "BanglaCard", "Noto Sans Bengali", sans-serif; font-size: 3.3mm; color: var(--navy); font-weight: 700; }
+  .f-title .en { font-size: 3.5mm; color: var(--navy); font-weight: 700; letter-spacing: .1mm; }
+  .band { margin: 1.6mm 0 0 3.5mm; width: 47mm; background: var(--band); color: #fff; font-weight: 700; font-size: 2.8mm; padding: .5mm 1.6mm; }
+  .f-body { display: flex; justify-content: space-between; padding: 0 3.5mm; }
+  .f-info { font-size: 2.7mm; line-height: 1.34; padding-top: 1.2mm; max-width: 54mm; }
+  .f-info .dept { color: var(--navy); font-weight: 700; }
+  .f-info .nm { color: var(--red); font-weight: 700; font-size: 3mm; }
+  .f-info b { display: inline-block; min-width: 14mm; }
+  .photo { width: 18mm; height: 22mm; border: .5mm solid var(--band); margin-top: -4.5mm; background: #e6eaf5; flex: none; display: grid; place-items: center; overflow: hidden; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .photo span { font: 2.4mm "Segoe UI", Arial, sans-serif; color: #7b84a3; }
+  .sigrow { position: absolute; left: 3.5mm; right: 3.5mm; bottom: 1.6mm; display: flex; justify-content: space-between; align-items: flex-end; font-size: 2.3mm; font-weight: 700; }
+  .sig { text-align: center; width: 29mm; }
+  .sig .im { height: 6.5mm; display: flex; align-items: flex-end; justify-content: center; }
+  .sig .im img { max-height: 6.5mm; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; }
+  .sig .ln { border-top: .2mm solid #1c2340; margin-bottom: .4mm; height: 0; }
+  .valid { position: absolute; left: 0; right: 0; bottom: 10.8mm; text-align: center; font-size: 2.4mm; font-weight: 700; }
+  /* back */
+  .b-date { text-align: right; font-size: 2.9mm; font-weight: 700; padding: 3mm 4mm 0; }
+  .b-notice { text-align: center; font-size: 2.8mm; font-weight: 700; line-height: 1.3; padding: 3mm 4mm 1.5mm; border-bottom: .3mm solid var(--navy); margin: 0 0 0; }
+  .b-body { display: flex; gap: 2.5mm; padding: 2.2mm 4mm; align-items: center; }
+  .b-info { font-size: 2.7mm; line-height: 1.38; }
+  .b-info .inst { font-family: "Segoe UI", Arial, sans-serif; color: var(--navy); font-weight: 700; font-size: 3.4mm; }
+
+  .tip { font-size: .8rem; color: var(--muted); margin-top: 18px; text-align: center; }
+
+  @page { size: 85.6mm 54mm; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .wrap { padding: 0; max-width: none; }
+    .pair { display: block; }
+    .cap { display: none; }
+    .card { box-shadow: none; border-radius: 0; border: 0; page-break-after: always; break-after: page; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="no-print">
+    <h1>ID Card Designer</h1>
+    <p class="sub">Fill in the details, add your own logo and photo, then print or save as PDF (card size, front and back).</p>
+
+    <div class="panel">
+      <div class="grid">
+        <div><label for="inst">Institution name</label><input id="inst" value="Northfield Institute of Technology"></div>
+        <div><label for="instBn">Bangla name (shown above English name)</label><input id="instBn" value="নর্থফিল্ড ইনস্টিটিউট অব টেকনোলজি"></div>
+        <div><label for="prog">Programme / role band</label><input id="prog" value="BACHELOR PROGRAMME"></div>
+        <div><label for="dept">Department</label><input id="dept" value="Department of Applied Sciences"></div>
+        <div><label for="name">Name</label><input id="name" value="STUDENT NAME"></div>
+        <div><label for="sid">ID</label><input id="sid" value="000000"></div>
+        <div><label for="sess">Session</label><input id="sess" value="2026-27"></div>
+        <div><label for="att">Attached to</label><input id="att" value="Partner College"></div>
+        <div><label for="valid">Valid up to</label><input id="valid" value="30 June 2030"></div>
+        <div><label for="issue">Date of issue</label><input id="issue" value="01 January 2027"></div>
+        <div><label for="addr">Return address (use new lines)</label><input id="addr" value="Address line 1; Address line 2; City, Country"></div>
+        <div><label for="phone">Phone</label><input id="phone" value="+880 0000-000000"></div>
+        <div><label for="mail">E-mail</label><input id="mail" value="office@example.com"></div>
+        <div><label for="sig1">Left signature label</label><input id="sig1" value="Principal's Signature"></div>
+        <div><label for="sig2">Right signature label</label><input id="sig2" value="Registrar's Signature"></div>
+        <div><label for="sigF1">Left signature image</label><input id="sigF1" type="file" accept="image/*"></div>
+        <div><label for="sigF2">Right signature image</label><input id="sigF2" type="file" accept="image/*"></div>
+        <div><label for="color">Band colour</label><input id="color" type="color" value="#1f4aa8" style="height:36px;padding:2px"></div>
+        <div><label for="logoF">Logo (your own)</label><input id="logoF" type="file" accept="image/*"></div>
+        <div><label for="photoF">Photo</label><input id="photoF" type="file" accept="image/*"></div>
+      </div>
+      <div class="actions">
+        <button onclick="window.print()">Print / Save as PDF</button>
+        <button class="alt" onclick="resetLogo()">Use placeholder logo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pair">
+    <div>
+      <div class="cap no-print">Front</div>
+      <div class="card" id="front">
+        <div class="f-head">
+          <div class="logo" id="logoBox"></div>
+          <div class="f-title">
+            <div class="bn" id="o-instBn"></div>
+            <div class="en" id="o-inst"></div>
+          </div>
+        </div>
+        <div class="band" id="o-prog"></div>
+        <div class="f-body">
+          <div class="f-info">
+            <div class="dept" id="o-dept"></div>
+            <div class="nm" id="o-name"></div>
+            <div><b>ID:</b><span id="o-sid"></span></div>
+            <div><b>Session:</b><span id="o-sess"></span></div>
+            <div><b>Attached:</b><span id="o-att"></span></div>
+          </div>
+          <div class="photo" id="photoBox"><span>PHOTO</span></div>
+        </div>
+        <div class="valid">Valid up to: <span id="o-valid"></span></div>
+        <div class="sigrow">
+          <div class="sig"><div class="im" id="sigBox1"></div><div class="ln"></div><span id="o-sig1"></span></div>
+          <div class="sig"><div class="im" id="sigBox2"></div><div class="ln"></div><span id="o-sig2"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="cap no-print">Back</div>
+      <div class="card" id="back">
+        <div class="b-date">Date of Issue: <span id="o-issue"></span></div>
+        <div class="b-notice">This card is the property of <span id="o-inst2"></span><br>If found, please return to the following address:</div>
+        <div class="b-body">
+          <div class="logo" id="logoBox2" style="width:14mm;height:14mm"></div>
+          <div class="b-info">
+            <div class="inst" id="o-inst3"></div>
+            <div id="o-addr"></div>
+            <div>Phone: <span id="o-phone"></span></div>
+            <div>E-mail: <span id="o-mail"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="tip no-print">Only upload a signature image with the signer's permission. Print at 100% scale, no margins.</p>
+</div>
+
+<script>
+  var PLACEHOLDER = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="46" fill="none" stroke="#17306b" stroke-width="5"/><path d="M28 36h20c4 0 7 2 7 6v26c0-4-3-6-7-6H28z M72 36H52c-4 0-7 2-7 6v26c0-4 3-6 7-6h20z" fill="#17306b"/></svg>';
+  var logoData = null, photoData = null, sig1 = null, sig2 = null;
+  var text = ['inst','instBn','prog','dept','name','sid','sess','att','valid','issue','phone','mail','sig1','sig2'];
+
+  function esc(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function logoHtml(){ return logoData ? '<img alt="Logo" src="'+logoData+'">' : PLACEHOLDER; }
+
+  function render(){
+    text.forEach(function(k){ var el=document.getElementById('o-'+k); if(el) el.textContent=document.getElementById(k).value; });
+    ['o-inst2','o-inst3'].forEach(function(id){ document.getElementById(id).textContent=document.getElementById('inst').value; });
+    var bn=document.getElementById('o-instBn'); bn.style.display = bn.textContent ? '' : 'none';
+    document.getElementById('o-addr').innerHTML = document.getElementById('addr').value.split(';').map(function(l){return esc(l.trim());}).join('<br>');
+    document.documentElement.style.setProperty('--band', document.getElementById('color').value);
+    document.getElementById('logoBox').innerHTML = logoHtml();
+    document.getElementById('logoBox2').innerHTML = logoHtml();
+    document.getElementById('sigBox1').innerHTML = sig1 ? '<img alt="" src="'+sig1+'">' : '';
+    document.getElementById('sigBox2').innerHTML = sig2 ? '<img alt="" src="'+sig2+'">' : '';
+    document.getElementById('photoBox').innerHTML = photoData ? '<img alt="Photo" src="'+photoData+'">' : '<span>PHOTO</span>';
+  }
+  function readFile(id, cb){
+    document.getElementById(id).addEventListener('change', function(e){
+      var f = e.target.files[0]; if(!f) return;
+      var r = new FileReader(); r.onload = function(){ cb(r.result); render(); }; r.readAsDataURL(f);
+    });
+  }
+  function resetLogo(){ logoData=null; document.getElementById('logoF').value=''; render(); }
+  readFile('logoF', function(d){ logoData=d; });
+  readFile('photoF', function(d){ photoData=d; });
+  readFile('sigF1', function(d){ sig1=d; });
+  readFile('sigF2', function(d){ sig2=d; });
+  document.querySelectorAll('input').forEach(function(i){ i.addEventListener('input', render); });
+  render();
+</script>
+</body>
+</html>
