@@ -60,7 +60,7 @@
   .sig { text-align: center; width: 29mm; }
   .sig .im { height: 6.5mm; display: flex; align-items: flex-end; justify-content: center; }
   .sig .im img { max-height: 6.5mm; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; }
-  .sig .ln { border-top: .2mm solid #1c2340; margin-bottom: .4mm; height: 0; }
+  .sig .ln { display: none; }
   .valid { position: absolute; left: 0; right: 0; bottom: 10.8mm; text-align: center; font-size: 2.4mm; font-weight: 700; }
   /* back */
   .b-date { text-align: right; font-size: 2.9mm; font-weight: 700; padding: 3mm 4mm 0; }
@@ -143,8 +143,8 @@
         </div>
         <div class="valid">Valid up to: <span id="o-valid"></span></div>
         <div class="sigrow">
-          <div class="sig"><div class="im" id="sigBox1"></div><div class="ln"></div><span id="o-sig1"></span></div>
-          <div class="sig"><div class="im" id="sigBox2"></div><div class="ln"></div><span id="o-sig2"></span></div>
+          <div class="sig"><div class="im" id="sigBox1"></div><span id="o-sig1"></span></div>
+          <div class="sig"><div class="im" id="sigBox2"></div><span id="o-sig2"></span></div>
         </div>
       </div>
     </div>
